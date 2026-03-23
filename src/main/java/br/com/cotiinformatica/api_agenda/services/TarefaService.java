@@ -61,12 +61,75 @@ public class TarefaService {
         return toResponse(tarefa);
     }
 
-    public List<TarefaResponse> consultar() {
+    public TarefaResponse atualizar(UUID id, TarefaRequest request) {
+
+        //Buscando a tarefa no banco de dados através do ID
+        var tarefaExistente = tarefaRepository.findById(id);
+        if(tarefaExistente.isEmpty()) {
+            throw new IllegalArgumentException("A tarefa não foi encontrada. Verifique o ID informado.");
+        }
+
+        //Gerar um objeto tarefa a partir da busca no banco de dados
+        var tarefa = tarefaExistente.get();
+
+        tarefa.setNome(request.getNome());
+
+        //Capturar e converter a data 'yyyy-MM-dd'
+        var dataFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        tarefa.setData(LocalDate.parse(request.getData(), dataFormatter));
+
+        //Capturar e converter a hora 'HH:mm'
+        var horaFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        tarefa.setHora(LocalTime.parse(request.getHora(), horaFormatter));
+
+        //Capturar o enum 'Prioridade'
+        tarefa.setPrioridade(Prioridade.valueOf(request.getPrioridade()));
+
+        //Verificar se a categoria não existe no banco de dados
+        var categoria = categoriaRepository.findById(request.getCategoriaId());
+        if (categoria.isEmpty()) {
+            throw new IllegalArgumentException("A categoria informada não existe, verifique o ID.");
+        }
+
+        //Capturar a categoria, associando-a à tarefa
+        tarefa.setCategoria(categoria.get());
+
+        tarefa.setUsuarioId(UUID.randomUUID()); //provisório..
+
+        //Salvar a tarefa no banco de dados
+        tarefaRepository.save(tarefa);
+
+        /// Retornar os dados
+        return toResponse(tarefa);
+    }
+
+    public TarefaResponse excluir(UUID id) {
+
+        //Buscando a tarefa no banco de dados através do ID
+        var tarefaExistente = tarefaRepository.findById(id);
+        if(tarefaExistente.isEmpty()) {
+            throw new IllegalArgumentException("A tarefa não foi encontrada. Verifique o ID informado.");
+        }
+
+        //Gerar um objeto tarefa a partir da busca no banco de dados
+        var tarefa = tarefaExistente.get();
+
+
+
+        //Salvar a tarefa no banco de dados
+        tarefaRepository.delete(tarefa);
+
+        /// Retornar os dados
+        return toResponse(tarefa);
+    }
+
+
+    public List<TarefaResponse> consultarPorDatas(LocalDate dataMin, LocalDate dataMax) {
 
         //Consultar todas as tarefas do banco de dados
-        var tarefas = tarefaRepository.findAll();
+        var tarefas = tarefaRepository.findByDatas(dataMin, dataMax);
 
-        //Gerar uma lista de CategoriaResponse copiando os dados de cada categoria
+        //Gerar uma lista de TarefaResponse copiando os dados de cada tarefa
         var response = tarefas
                 .stream()
                 .map(this::toResponse)
@@ -74,6 +137,22 @@ public class TarefaService {
 
         //Retornar a lista
         return response;
+    }
+
+    public TarefaResponse obterPorId(UUID id) {
+
+        //Buscando a tarefa no banco de dados através do ID
+        var tarefaExistente = tarefaRepository.findById(id);
+        if(tarefaExistente.isEmpty()) {
+            throw new IllegalArgumentException("A tarefa não foi encontrada. Verifique o ID informado.");
+        }
+
+        //Gerar um objeto tarefa a partir da busca no banco de dados
+        var tarefa = tarefaExistente.get();
+
+
+        /// Retornar os dados
+        return toResponse(tarefa);
     }
 
     /*
@@ -97,4 +176,3 @@ public class TarefaService {
     }
 
 }
-
