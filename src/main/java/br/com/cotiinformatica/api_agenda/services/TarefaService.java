@@ -1,8 +1,6 @@
 package br.com.cotiinformatica.api_agenda.services;
 
-import br.com.cotiinformatica.api_agenda.dtos.CategoriaResponse;
-import br.com.cotiinformatica.api_agenda.dtos.TarefaRequest;
-import br.com.cotiinformatica.api_agenda.dtos.TarefaResponse;
+import br.com.cotiinformatica.api_agenda.dtos.*;
 import br.com.cotiinformatica.api_agenda.entities.Tarefa;
 import br.com.cotiinformatica.api_agenda.enums.Prioridade;
 import br.com.cotiinformatica.api_agenda.repositories.CategoriaRepository;
@@ -154,6 +152,23 @@ public class TarefaService {
         /// Retornar os dados
         return toResponse(tarefa);
     }
+
+    /*
+        Método para retornar a consulta de quantidade de tarefas por categoria
+    */
+
+    public List<TarefaCategoriaDto> obterTarefasPorCategoria(LocalDate dataMin, LocalDate dataMax) {
+        return tarefaRepository.groupByTarefaCategoria(dataMin, dataMax);
+    }
+
+    /*
+        Método para retornar a consulta de quantidade de tarefas por prioridade
+    */
+
+    public List<TarefaPrioridadeDto> obterTarefasPorPrioridade(LocalDate dataMin, LocalDate dataMax) {
+        return tarefaRepository.groupByTarefaPrioridade(dataMin, dataMax);
+    }
+
 
     /*
         Método para copiar os dados da entidade para o responseDTO
